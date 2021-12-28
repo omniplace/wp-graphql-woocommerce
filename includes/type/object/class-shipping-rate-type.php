@@ -55,8 +55,20 @@ class Shipping_Rate_Type {
 					'cost'       => array(
 						'type'        => 'String',
 						'description' => __( 'Shipping rate cost', 'wp-graphql-woocommerce' ),
-						'resolve'     => function ( $source ) {
-							return ! empty( $source->get_cost() ) ? $source->get_cost() : null;
+						'args'        => array(
+							'format' => array(
+								'type'        => 'PricingFieldFormatEnum',
+								'description' => __( 'Format of the price', 'wp-graphql-woocommerce' ),
+							),
+						),
+						'resolve'     => function( $source, $args ) {
+							$price = ! empty( $source->get_cost() ) ? $source->get_cost() : null;
+							if ( isset( $args['format'] ) && 'raw' === $args['format'] ) {
+								// @codingStandardsIgnoreLine.
+								return $price;
+							} else {
+								return \wc_graphql_price( $price );
+							}
 						},
 					),
 				),

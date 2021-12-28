@@ -334,6 +334,12 @@ class Product_Types {
 						'price'                => array(
 							'type'        => 'String',
 							'description' => __( 'Products\' price range', 'wp-graphql-woocommerce' ),
+							'args'        => array(
+								'format' => array(
+									'type'        => 'PricingFieldFormatEnum',
+									'description' => __( 'Format of the price', 'wp-graphql-woocommerce' ),
+								),
+							),
 							'resolve'     => function( $source ) {
 								$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 								$child_prices     = array();
@@ -360,8 +366,13 @@ class Product_Types {
 								if ( $min_price !== $max_price ) {
 									return \wc_graphql_price_range( $min_price, $max_price );
 								}
-
-								return \wc_graphql_price( $min_price );
+								
+								if ( isset( $args['format'] ) && 'raw' === $args['format'] ) {
+									// @codingStandardsIgnoreLine.
+									return $min_price;
+								} else {
+									return \wc_graphql_price( $min_price );
+								}
 							},
 						),
 					)

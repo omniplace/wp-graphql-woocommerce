@@ -441,10 +441,22 @@ class Order_Item_Type {
 						},
 					),
 					'amount'    => array(
-						'type'        => 'PricingFieldFormatEnum',
+						'type'        => 'String',
 						'description' => __( 'Amount taxed', 'wp-graphql-woocommerce' ),
-						'resolve'     => function( $source ) {
-							return ! empty( $source['amount'] ) ? $source['amount'] : null;
+						'args'        => array(
+							'format' => array(
+								'type'        => 'PricingFieldFormatEnum',
+								'description' => __( 'Format of the price', 'wp-graphql-woocommerce' ),
+							),
+						),
+						'resolve'     => function( $source, $args ) {
+							$price = ! empty( $source['amount'] ) ? $source['amount'] : null;
+							if ( isset( $args['format'] ) && 'raw' === $args['format'] ) {
+								// @codingStandardsIgnoreLine.
+								return $price;
+							} else {
+								return \wc_graphql_price( $price );
+							}
 						},
 					),
 					'taxLine'   => array(
